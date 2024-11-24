@@ -1,9 +1,8 @@
-// Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
-import MenuItems from './MenuItems'; // Importa o componente MenuItems
-import AdminControls from './AdminControls'; // Importa o componente AdminControls
+import MenuItems from './MenuItems';
+import AdminControls from './AdminControls';
 import axios from 'axios';
 
 const Dashboard = () => {
@@ -31,10 +30,16 @@ const Dashboard = () => {
     const fetchMenuData = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/menu');
-        setMenuData(response.data);
+        const sanitizedData = response.data.map((category) => ({
+          ...category,
+          items: category.items.map((item) => ({
+            ...item,
+          })),
+        }));
+        setMenuData(sanitizedData);
 
-        if (response.data.length > 0) {
-          setCurrentTab(response.data[0].category);
+        if (sanitizedData.length > 0) {
+          setCurrentTab(sanitizedData[0].category);
         }
       } catch (error) {
         console.error('Erro ao buscar os dados do menu:', error);
@@ -46,10 +51,13 @@ const Dashboard = () => {
 
   // Função para atualizar a quantidade de um item específico
   const updateQuantity = (itemId, delta) => {
-    setQuantities((prev) => ({
-      ...prev,
-      [itemId]: Math.max((prev[itemId] || 0) + delta, 0),
-    }));
+    setQuantities((prev) => {
+      const updated = {
+        ...prev,
+        [itemId]: Math.max((prev[itemId] || 0) + delta, 0),
+      };
+      return updated;
+    });
   };
 
   // Prepara os detalhes do pedido para revisão antes de enviar
@@ -66,24 +74,27 @@ const Dashboard = () => {
     let total = 0;
     const details = selectedItems.map(([itemId, qty]) => {
       let itemFound = null;
+      let categoryPrice = 0; // Adiciona variável para o preço da categoria
+
       for (const category of menuData) {
-        const item = category.items.find((itm) => itm.id === parseInt(itemId));
+        const item = category.items.find((itm) => itm._id === itemId);
         if (item) {
           itemFound = { ...item, category: category.category };
+          categoryPrice = category.price || 0; // Pega o preço da categoria
           break;
         }
       }
 
       if (itemFound) {
-        const itemPrice = itemFound.price * qty;
+        const itemPrice = categoryPrice * qty; // Usa o preço da categoria
         total += itemPrice;
 
         return {
-          item: itemFound.name,
+          item: itemFound.name || 'Desconhecido',
           qty,
-          category: itemFound.category,
-          pricePerUnit: itemFound.price,
-          totalPrice: itemPrice,
+          category: itemFound.category || 'Não especificado',
+          pricePerUnit: categoryPrice || 0, // Preço da categoria
+          totalPrice: itemPrice || 0,
         };
       }
 
@@ -101,8 +112,8 @@ const Dashboard = () => {
       Item: detail.item,
       Categoria: detail.category,
       Quantidade: detail.qty,
-      'Preço Unitário': `R$${detail.pricePerUnit.toFixed(2).replace('.', ',')}`,
-      'Preço Total': `R$${detail.totalPrice.toFixed(2).replace('.', ',')}`,
+      'Preço Unitário': `R$${detail.pricePerUnit?.toFixed(2).replace('.', ',')}`,
+      'Preço Total': `R$${detail.totalPrice?.toFixed(2).replace('.', ',')}`,
     }));
 
     const csvSeparator = ';';
@@ -197,19 +208,20 @@ const Dashboard = () => {
       </div>
 
       <div className="main-content">
-        <nav className="tabs">
-          {menuData.map((category) => (
-            <button
-              key={category.category}
-              className={`tab-button ${
-                category.category === currentTab ? 'active' : ''
-              }`}
-              onClick={() => setCurrentTab(category.category)}
-            >
-              {category.category} - R${category.price}
-            </button>
-          ))}
-        </nav>
+      <nav className="tabs">
+        {menuData.map((category) => (
+          <button
+            key={category.category}
+            className={`tab-button ${
+              category.category === currentTab ? 'active' : ''
+            }`}
+            onClick={() => setCurrentTab(category.category)}
+          >
+            {`${category.category} - R$${category.price?.toFixed(2).replace('.', ',')}`}
+          </button>
+        ))}
+      </nav>
+
 
         <MenuItems
           menuData={menuData}
@@ -256,14 +268,14 @@ const Dashboard = () => {
                       <td>{detail.item}</td>
                       <td>{detail.category}</td>
                       <td>{detail.qty}</td>
-                      <td>R${detail.pricePerUnit.toFixed(2)}</td>
-                      <td>R${detail.totalPrice.toFixed(2)}</td>
+                      <td>R${detail.pricePerUnit?.toFixed(2).replace('.', ',') || '0,00'}</td>
+                      <td>R${detail.totalPrice?.toFixed(2).replace('.', ',') || '0,00'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <h3>Total: R${totalPrice.toFixed(2)}</h3>
+            <h3>Total: R${totalPrice.toFixed(2).replace('.', ',')}</h3>
             <div className="modal-buttons">
               <button onClick={sendOrder}>Confirmar Pedido</button>
               <button onClick={() => setShowConfirmationModal(false)}>Cancelar</button>

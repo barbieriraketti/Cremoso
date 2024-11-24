@@ -3,6 +3,11 @@ import axios from 'axios';
 
 const MenuItems = ({ menuData, currentTab, quantities, updateQuantity, role, setMenuData }) => {
   const removeItem = async (itemName) => {
+    if (!itemName) {
+      alert('Erro: Nome do item não encontrado.');
+      return;
+    }
+
     const categoryData = menuData.find((cat) => cat.category === currentTab);
     if (!categoryData) {
       alert('Categoria atual não encontrada.');
@@ -51,15 +56,15 @@ const MenuItems = ({ menuData, currentTab, quantities, updateQuantity, role, set
           .filter((cat) => cat.category === currentTab)
           .map((category) =>
             category.items.map((item) => (
-              <div key={item.name} className="menu-item">
+              <div key={item._id} className="menu-item">
                 <div className="item-info">
                   <span className="item-name">{item.name}</span>
                   <p className="item-description">{item.description}</p>
                 </div>
                 <div className="item-controls">
-                  <button onClick={() => updateQuantity(item.name, -1)}>-</button>
-                  <span>{quantities[item.name] || 0}</span>
-                  <button onClick={() => updateQuantity(item.name, 1)}>+</button>
+                  <button onClick={() => updateQuantity(item._id, -1)}>-</button>
+                  <span>{quantities[item._id] || 0}</span>
+                  <button onClick={() => updateQuantity(item._id, 1)}>+</button>
                   {role === 'admin' && (
                     <button
                       className="remove-button"

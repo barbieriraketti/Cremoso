@@ -1,18 +1,24 @@
+// Dashboard.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
+import MenuItems from './MenuItems'; // Importa o componente MenuItems
+import AdminControls from './AdminControls'; // Importa o componente AdminControls
 import axios from 'axios';
 
 const Dashboard = () => {
-  const [currentTab, setCurrentTab] = useState(''); // Aba ativa
-  const [menuData, setMenuData] = useState([]); // Dados do menu vindos do servidor
-  const [quantities, setQuantities] = useState({}); // Quantidade por item
-  const [user, setUser] = useState(''); // Nome do usuário logado
-  const [role, setRole] = useState('user'); // Papel do usuário
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false); // Controle do modal
-  const [orderDetails, setOrderDetails] = useState([]); // Detalhes do pedido
-  const [totalPrice, setTotalPrice] = useState(0); // Preço total do pedido
+  const [currentTab, setCurrentTab] = useState('');
+  const [menuData, setMenuData] = useState([]);
+  const [quantities, setQuantities] = useState({});
+  const [user, setUser] = useState('');
+  const [role, setRole] = useState('user');
+  const [orderDetails, setOrderDetails] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
-  // Obter o usuário logado e o papel
+  const navigate = useNavigate();
+
+  // Obtém o usuário logado e o papel (role) do localStorage
   useEffect(() => {
     const loggedInUser = localStorage.getItem('username');
     const userRole = localStorage.getItem('role') || 'user';
@@ -20,17 +26,15 @@ const Dashboard = () => {
     setRole(userRole);
   }, []);
 
-  // Buscar os dados do menu do servidor
+  // Busca os dados do menu da API quando o componente é montado
   useEffect(() => {
     const fetchMenuData = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/menu');
-        const data = response.data;
-        setMenuData(data);
+        setMenuData(response.data);
 
-        // Define a primeira categoria como aba ativa
-        if (data.length > 0) {
-          setCurrentTab(data[0].category);
+        if (response.data.length > 0) {
+          setCurrentTab(response.data[0].category);
         }
       } catch (error) {
         console.error('Erro ao buscar os dados do menu:', error);
@@ -40,65 +44,68 @@ const Dashboard = () => {
     fetchMenuData();
   }, []);
 
-  // Atualiza a quantidade de itens
-  const updateQuantity = (itemName, delta) => {
+  // Função para atualizar a quantidade de um item específico
+  const updateQuantity = (itemId, delta) => {
     setQuantities((prev) => ({
       ...prev,
-      [itemName]: Math.max((prev[itemName] || 0) + delta, 0),
+      [itemId]: Math.max((prev[itemId] || 0) + delta, 0),
     }));
   };
 
-  // Preparar dados do pedido para confirmação
+  // Prepara os detalhes do pedido para revisão antes de enviar
   const prepareOrder = () => {
     const selectedItems = Object.entries(quantities).filter(
       ([_, qty]) => qty > 0
     );
+
     if (selectedItems.length === 0) {
       alert('Nenhum item selecionado!');
-    } else {
-      let total = 0;
-      const details = selectedItems.map(([itemName, qty]) => {
-        // Encontrar a categoria e o preço do item
-        let itemCategory = '';
-        let pricePerUnit = 0;
-        for (const categoryData of menuData) {
-          const foundItem = categoryData.items.find((i) => i.name === itemName);
-          if (foundItem) {
-            itemCategory = categoryData.category;
-            pricePerUnit = categoryData.price;
-            break;
-          }
+      return;
+    }
+
+    let total = 0;
+    const details = selectedItems.map(([itemId, qty]) => {
+      let itemFound = null;
+      for (const category of menuData) {
+        const item = category.items.find((itm) => itm.id === parseInt(itemId));
+        if (item) {
+          itemFound = { ...item, category: category.category };
+          break;
         }
-        const itemPrice = pricePerUnit * qty;
+      }
+
+      if (itemFound) {
+        const itemPrice = itemFound.price * qty;
         total += itemPrice;
+
         return {
-          item: itemName,
+          item: itemFound.name,
           qty,
-          category: itemCategory,
-          pricePerUnit: pricePerUnit,
+          category: itemFound.category,
+          pricePerUnit: itemFound.price,
           totalPrice: itemPrice,
         };
-      });
+      }
 
-      setOrderDetails(details);
-      setTotalPrice(total);
-      setShowConfirmationModal(true);
-    }
+      return null;
+    });
+
+    setOrderDetails(details.filter((d) => d !== null));
+    setTotalPrice(total);
+    setShowConfirmationModal(true);
   };
 
-  // Função para confirmar o pedido e gerar o arquivo CSV
-  const confirmOrder = () => {
-    // Preparar dados para o arquivo
+  // Gera um arquivo CSV com os detalhes do pedido
+  const generateCSV = () => {
     const fileData = orderDetails.map((detail) => ({
       Item: detail.item,
       Categoria: detail.category,
       Quantidade: detail.qty,
-      'Preço Unitário': detail.pricePerUnit,
-      'Preço Total': detail.totalPrice,
+      'Preço Unitário': `R$${detail.pricePerUnit.toFixed(2).replace('.', ',')}`,
+      'Preço Total': `R$${detail.totalPrice.toFixed(2).replace('.', ',')}`,
     }));
 
-    // Converter dados para CSV com BOM
-    const csvSeparator = ';'; // Use ';' se necessário
+    const csvSeparator = ';';
     const csvHeader = [
       'Item',
       'Categoria',
@@ -119,122 +126,62 @@ const Dashboard = () => {
         .join(csvSeparator)
     );
 
-    // Adicionar a linha do preço total ao CSV
     csvRows.push(`"","","","",""`);
-    csvRows.push(`"Total","","","",${totalPrice}`);
+    csvRows.push(
+      `"Total","","","",${`"R$${totalPrice.toFixed(2).replace('.', ',')}"`}`
+    );
 
     const csvContent =
       '\uFEFF' + [csvHeader.join(csvSeparator), ...csvRows].join('\n');
 
-    // Obter a data atual e o nome do usuário para o nome do arquivo
     const currentDate = new Date()
       .toLocaleDateString('pt-BR')
       .replace(/\//g, '-');
-    const username = user || 'usuario';
+    const filename = `pedido_${user || 'usuario'}_${currentDate}.csv`;
 
-    const filename = `pedido_${username}_${currentDate}.csv`;
-
-    // Criar link para download
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
     link.setAttribute('download', filename);
-    document.body.appendChild(link); // Requerido para Firefox
-
-    link.click(); // Baixar o arquivo CSV
-
-    document.body.removeChild(link); // Limpar
-
-    // Fechar o modal e resetar as quantidades
-    setShowConfirmationModal(false);
-    setQuantities({});
-    alert('Pedido confirmado! Obrigado pela preferência.');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  // Funções de administrador
-  const addNewItem = async (category) => {
-    const categoryData = menuData.find((cat) => cat.category === category);
-    if (!categoryData) return;
-
-    const newItemName = prompt('Digite o nome do novo sabor:');
-    if (newItemName) {
-      const newItemDescription = prompt('Digite a descrição do novo sabor:');
-      try {
-        const token = localStorage.getItem('token');
-        await axios.post(
-          'http://localhost:5000/api/menu/addItem',
-          { category, item: newItemName, description: newItemDescription },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        // Atualiza o estado local
-        setMenuData((prev) =>
-          prev.map((cat) =>
-            cat.category === category
-              ? {
-                  ...cat,
-                  items: [
-                    ...cat.items,
-                    { name: newItemName, description: newItemDescription },
-                  ],
-                }
-              : cat
-          )
-        );
-        alert(
-          `Novo item "${newItemName}" adicionado à categoria "${category}"!`
-        );
-      } catch (error) {
-        console.error('Erro ao adicionar novo item:', error);
-        alert('Erro ao adicionar novo item.');
-      }
-    } else {
-      alert('Nenhum nome fornecido. Operação cancelada.');
-    }
-  };
-
-  const removeItem = async (category, itemToRemove) => {
-    const categoryData = menuData.find((cat) => cat.category === category);
-    if (!categoryData) return;
-
+  // Envia o pedido para a API
+  const sendOrder = async () => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post(
-        'http://localhost:5000/api/menu/removeItem',
-        { category, item: itemToRemove },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const payload = {
+        user: user || 'Usuário Anônimo',
+        orderDetails,
+        totalPrice,
+      };
+
+      const response = await axios.post(
+        'http://localhost:5000/api/order',
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      // Atualiza o estado local
-      setMenuData((prev) =>
-        prev.map((cat) =>
-          cat.category === category
-            ? {
-                ...cat,
-                items: cat.items.filter((item) => item.name !== itemToRemove),
-              }
-            : cat
-        )
-      );
-      alert(
-        `Item "${itemToRemove}" removido da categoria "${category}"!`
-      );
+
+      if (response.status === 201) {
+        alert('Pedido enviado com sucesso! Obrigado pela preferência.');
+        generateCSV();
+        setShowConfirmationModal(false);
+        setQuantities({});
+        setOrderDetails([]);
+      } else {
+        alert('Erro ao enviar o pedido. Tente novamente.');
+      }
     } catch (error) {
-      console.error('Erro ao remover item:', error);
-      alert('Erro ao remover item.');
+      console.error('Erro ao enviar o pedido:', error);
+      alert('Erro ao enviar o pedido. Tente novamente.');
     }
   };
 
   return (
     <div className="dashboard">
-      {/* Barra Lateral */}
       <div className="sidebar">
         <img
           src="/assets/logo.png"
@@ -244,11 +191,12 @@ const Dashboard = () => {
         <h2>Sorveteria Cremoso</h2>
         <h3>{user}</h3>
         <h3>{role === 'admin' ? 'Modo Administrador' : 'Modo Usuário'}</h3>
+        <button onClick={() => navigate('/historico')} className="historico-button">
+          Ver Histórico
+        </button>
       </div>
 
-      {/* Conteúdo Principal */}
       <div className="main-content">
-        {/* Navegação por Abas */}
         <nav className="tabs">
           {menuData.map((category) => (
             <button
@@ -263,59 +211,30 @@ const Dashboard = () => {
           ))}
         </nav>
 
-        {/* Área Scrollável dos Produtos */}
-        <div className="menu-items-container">
-          <div className="menu-items">
-            {menuData
-              .filter((cat) => cat.category === currentTab)
-              .map((category) =>
-                category.items.map((item) => (
-                  <div key={item.name} className="menu-item">
-                    <span className="item-name">{item.name}</span>
-                    <p className="item-description">{item.description}</p>
-                    <div className="item-controls">
-                      <button onClick={() => updateQuantity(item.name, -1)}>
-                        -
-                      </button>
-                      <span>{quantities[item.name] || 0}</span>
-                      <button onClick={() => updateQuantity(item.name, 1)}>
-                        +
-                      </button>
-                    </div>
-                    {/* Botão de Remover visível apenas para o administrador */}
-                    {role === 'admin' && (
-                      <button
-                        className="remove-button"
-                        onClick={() => removeItem(currentTab, item.name)}
-                      >
-                        Remover
-                      </button>
-                    )}
-                  </div>
-                ))
-              )}
-          </div>
-        </div>
+        <MenuItems
+          menuData={menuData}
+          currentTab={currentTab}
+          quantities={quantities}
+          updateQuantity={updateQuantity}
+          role={role}
+          setMenuData={setMenuData}
+        />
 
-        {/* Exibir controles de administrador somente se o papel for 'admin' */}
         {role === 'admin' && (
-          <div className="admin-controls">
-            <h3>Administração</h3>
-            <button onClick={() => addNewItem(currentTab)}>
-              Adicionar Novo Item
-            </button>
-          </div>
+          <AdminControls
+            menuData={menuData}
+            setMenuData={setMenuData}
+            currentTab={currentTab}
+          />
         )}
-
-        {/* Rodapé */}
-        <footer className="footer">
-          <button className="confirm-button" onClick={prepareOrder}>
-            Confirmar Pedido
-          </button>
-        </footer>
       </div>
 
-      {/* Modal de Confirmação */}
+      <footer className="footer">
+        <button className="confirm-button" onClick={prepareOrder}>
+          Enviar Pedido
+        </button>
+      </footer>
+
       {showConfirmationModal && (
         <div className="modal-overlay">
           <div className="modal">
@@ -337,19 +256,17 @@ const Dashboard = () => {
                       <td>{detail.item}</td>
                       <td>{detail.category}</td>
                       <td>{detail.qty}</td>
-                      <td>R${detail.pricePerUnit}</td>
-                      <td>R${detail.totalPrice}</td>
+                      <td>R${detail.pricePerUnit.toFixed(2)}</td>
+                      <td>R${detail.totalPrice.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <h3>Total: R${totalPrice}</h3>
+            <h3>Total: R${totalPrice.toFixed(2)}</h3>
             <div className="modal-buttons">
-              <button onClick={confirmOrder}>Confirmar Pedido</button>
-              <button onClick={() => setShowConfirmationModal(false)}>
-                Cancelar
-              </button>
+              <button onClick={sendOrder}>Confirmar Pedido</button>
+              <button onClick={() => setShowConfirmationModal(false)}>Cancelar</button>
             </div>
           </div>
         </div>
@@ -357,6 +274,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
 
 export default Dashboard;

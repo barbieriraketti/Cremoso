@@ -1,0 +1,122 @@
+/* Corpo da página */
+body {
+  background: linear-gradient(to bottom, #ffffff, #f9f9f9);
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+/* Seção do histórico */
+.historico {
+  padding: 30px;
+  max-width: 1200px;
+  margin: 50px auto;
+  background-color: #fefefe;
+  border-radius: 8px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Título */
+.historico h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 2rem;
+  font-family: 'Arial', sans-serif;
+  color: #0056b3;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Filtro */
+.filter-container {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.filter-container label {
+  font-weight: bold;
+}
+
+.filter-container input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.filter-container button {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.filter-container button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.filter-container button::before {
+  content: '🔍 ';
+  font-size: 1rem;
+  margin-right: 5px;
+}
+
+/* Tabela */
+.historico table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 auto;
+  font-family: 'Arial', sans-serif;
+  background: #ffffff;
+  border-radius: 5px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.historico table th,
+.historico table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.historico table th {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+}
+
+.historico table tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.historico table tr:nth-child(even) {
+  background-color: #ffffff;
+}
+
+.historico table tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Lista dentro da tabela */
+.historico table td ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.historico table td ul li {
+  margin-bottom: 5px;
+}

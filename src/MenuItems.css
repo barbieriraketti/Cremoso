@@ -1,0 +1,33 @@
+.menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .item-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .remove-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    color: #ff4d4f;
+    transition: transform 0.2s, color 0.2s;
+  }
+  
+  .remove-button:hover {
+    transform: scale(1.2);
+    color: #d9363e;
+  }
+  
+  .remove-button:focus {
+    outline: none;
+  }
+  

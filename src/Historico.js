@@ -35,17 +35,22 @@ const Historico = () => {
       alert('Por favor, selecione ambas as datas para filtrar.');
       return;
     }
-
+  
     const filtered = orders.filter((order) => {
       const orderDate = new Date(order.createdAt);
       const start = new Date(startDate);
       const end = new Date(endDate);
-
+  
+      // Ajustar o horário das datas para comparar apenas o dia
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+  
       return orderDate >= start && orderDate <= end;
     });
-
+  
     setFilteredOrders(filtered);
   };
+  
 
   return (
     <div className="historico">

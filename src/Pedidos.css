@@ -1,0 +1,124 @@
+/* Pedidos.css */
+/* Reset Básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.pedidos-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.pedidos-container h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #e74c3c;
+}
+
+.pedido-form label {
+  display: block;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  color: #333;
+}
+
+.pedido-form label input,
+.pedido-form label select,
+.pedido-form label textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.pedido-form label textarea {
+  resize: vertical;
+  height: 80px;
+}
+
+.pedido-form .buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.pedido-form .buttons button {
+  flex: 1;
+  margin: 0 5px;
+  padding: 12px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.pedido-form .buttons button[type='submit'] {
+  background: #3498db;
+}
+
+.pedido-form .buttons button[type='button'] {
+  background: #e74c3c;
+}
+
+.pedido-form .buttons button:hover {
+  opacity: 0.9;
+}
+
+.pedido-form h3 {
+  text-align: right;
+  margin-top: 10px;
+  color: #333;
+}
+
+.order-summary {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+}
+
+.order-summary h2 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.order-summary ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.order-summary li {
+  margin-bottom: 10px;
+}
+
+.order-summary h3 {
+  text-align: right;
+  margin-top: 15px;
+  color: #333;
+}
+
+.submit-order-button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  font-size: 1.2rem;
+  background-color: #2ecc71;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.submit-order-button:hover {
+  opacity: 0.9;
+}

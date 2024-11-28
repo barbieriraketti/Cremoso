@@ -1,3 +1,4 @@
+// Historico.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Historico.css';
@@ -21,7 +22,7 @@ const Historico = () => {
           params: { username: loggedInUser },
         });
         setOrders(response.data);
-        setFilteredOrders(response.data); // Inicialmente, todos os pedidos são exibidos
+        setFilteredOrders(response.data); // Exibe todos os pedidos inicialmente
       } catch (error) {
         console.error('Erro ao buscar histórico de pedidos:', error);
       }
@@ -35,22 +36,21 @@ const Historico = () => {
       alert('Por favor, selecione ambas as datas para filtrar.');
       return;
     }
-  
+
     const filtered = orders.filter((order) => {
       const orderDate = new Date(order.createdAt);
       const start = new Date(startDate);
       const end = new Date(endDate);
-  
-      // Ajustar o horário das datas para comparar apenas o dia
+
+      // Ajusta o horário para comparar apenas o dia
       start.setHours(0, 0, 0, 0);
       end.setHours(23, 59, 59, 999);
-  
+
       return orderDate >= start && orderDate <= end;
     });
-  
+
     setFilteredOrders(filtered);
   };
-  
 
   return (
     <div className="historico">
@@ -96,7 +96,31 @@ const Historico = () => {
                   <ul>
                     {order.orderDetails.map((detail, i) => (
                       <li key={i}>
-                        {detail.qty}x {detail.item} - R${detail.totalPrice.toFixed(2).replace('.', ',')}
+                        {detail.qty}x {detail.category} - {detail.item} - R$
+                        {detail.totalPrice.toFixed(2).replace('.', ',')}
+                        {/* Mostrar detalhes adicionais se existirem */}
+                        {detail.details && (
+                          <ul>
+                            {detail.details.size && (
+                              <li>Tamanho: {detail.details.size}</li>
+                            )}
+                            {detail.details.flavor1 && (
+                              <li>Sabor 1: {detail.details.flavor1}</li>
+                            )}
+                            {detail.details.flavor2 && (
+                              <li>Sabor 2: {detail.details.flavor2}</li>
+                            )}
+                            {detail.details.topping && (
+                              <li>Cobertura: {detail.details.topping}</li>
+                            )}
+                            {detail.details.description && (
+                              <li>Descrição: {detail.details.description}</li>
+                            )}
+                            {detail.details.additionalNotes && (
+                              <li>Notas: {detail.details.additionalNotes}</li>
+                            )}
+                          </ul>
+                        )}
                       </li>
                     ))}
                   </ul>

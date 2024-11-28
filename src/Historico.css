@@ -5,20 +5,27 @@ body {
   color: #333;
   margin: 0;
   padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Alinha o conteúdo no topo */
+  min-height: 100vh; /* Garante que o body ocupe toda a altura da janela */
+  overflow-y: auto; /* Habilita barra de rolagem vertical */
+  overflow-x: hidden; /* Evita barra de rolagem horizontal */
 }
 
 /* Seção do histórico */
 .historico {
+  width: 90%; /* Ocupar 90% da largura da tela */
+  max-width: 800px; /* Define uma largura máxima */
   padding: 30px;
-  max-width: 1200px;
-  margin: 50px auto;
+  margin: 20px auto; /* Garante espaçamento no topo e no centro */
   background-color: #fefefe;
   border-radius: 8px;
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Título */
-.historico h2 {
+.historico h1 {
   text-align: center;
   margin-bottom: 20px;
   font-size: 2rem;
@@ -31,8 +38,8 @@ body {
 .filter-container {
   margin-bottom: 20px;
   display: flex;
+  flex-wrap: wrap; /* Permite quebrar em linhas para telas menores */
   justify-content: center;
-  align-items: center;
   gap: 15px;
 }
 
@@ -75,12 +82,10 @@ body {
 .historico table {
   width: 100%;
   border-collapse: collapse;
-  margin: 0 auto;
   font-family: 'Arial', sans-serif;
   background: #ffffff;
   border-radius: 5px;
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
 }
 
 .historico table th,
@@ -89,6 +94,7 @@ body {
   padding: 10px;
   text-align: center;
   font-size: 0.9rem;
+  word-wrap: break-word; /* Garante que o texto seja quebrado */
 }
 
 .historico table th {
@@ -119,4 +125,24 @@ body {
 
 .historico table td ul li {
   margin-bottom: 5px;
+  white-space: nowrap; /* Evita quebra de linha dentro de itens da lista */
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .historico {
+    padding: 20px;
+    max-width: 100%; /* Ajusta a largura para caber em telas menores */
+  }
+
+  .filter-container {
+    flex-direction: column; /* Alinha os elementos verticalmente */
+    gap: 10px;
+  }
+
+  .historico table th,
+  .historico table td {
+    font-size: 0.8rem; /* Reduz o tamanho do texto em telas pequenas */
+    padding: 8px;
+  }
 }

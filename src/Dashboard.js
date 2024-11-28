@@ -1,3 +1,4 @@
+// Dashboard.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
@@ -205,23 +206,27 @@ const Dashboard = () => {
         <button onClick={() => navigate('/historico')} className="historico-button">
           Ver Histórico
         </button>
+
+        {/* Novo botão para Pedidos Especiais */}
+        <button onClick={() => navigate('/pedidos')} className="pedidos-button">
+          Fazer Pedido Especial
+        </button>
       </div>
 
       <div className="main-content">
-      <nav className="tabs">
-        {menuData.map((category) => (
-          <button
-            key={category.category}
-            className={`tab-button ${
-              category.category === currentTab ? 'active' : ''
-            }`}
-            onClick={() => setCurrentTab(category.category)}
-          >
-            {`${category.category} - R$${category.price?.toFixed(2).replace('.', ',')}`}
-          </button>
-        ))}
-      </nav>
-
+        <nav className="tabs">
+          {menuData.map((category) => (
+            <button
+              key={category.category}
+              className={`tab-button ${
+                category.category === currentTab ? 'active' : ''
+              }`}
+              onClick={() => setCurrentTab(category.category)}
+            >
+              {`${category.category} - R$${category.price?.toFixed(2).replace('.', ',')}`}
+            </button>
+          ))}
+        </nav>
 
         <MenuItems
           menuData={menuData}
@@ -268,8 +273,14 @@ const Dashboard = () => {
                       <td>{detail.item}</td>
                       <td>{detail.category}</td>
                       <td>{detail.qty}</td>
-                      <td>R${detail.pricePerUnit?.toFixed(2).replace('.', ',') || '0,00'}</td>
-                      <td>R${detail.totalPrice?.toFixed(2).replace('.', ',') || '0,00'}</td>
+                      <td>
+                        R$
+                        {detail.pricePerUnit?.toFixed(2).replace('.', ',') || '0,00'}
+                      </td>
+                      <td>
+                        R$
+                        {detail.totalPrice?.toFixed(2).replace('.', ',') || '0,00'}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

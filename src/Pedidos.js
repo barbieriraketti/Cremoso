@@ -38,6 +38,20 @@ const Pedidos = () => {
     setUser(loggedInUser || 'Usuário Anônimo');
   }, []);
 
+  // Ao montar, tenta carregar o pedido salvo no localStorage
+  useEffect(() => {
+    const savedOrderItems = JSON.parse(localStorage.getItem('orderItems')) || [];
+    const savedTotalPrice = parseFloat(localStorage.getItem('totalOrderPrice')) || 0;
+    setOrderItems(savedOrderItems);
+    setTotalOrderPrice(savedTotalPrice);
+  }, []);
+
+  // Sempre que orderItems ou totalOrderPrice mudar, salva no localStorage
+  useEffect(() => {
+    localStorage.setItem('orderItems', JSON.stringify(orderItems));
+    localStorage.setItem('totalOrderPrice', totalOrderPrice.toString());
+  }, [orderItems, totalOrderPrice]);
+
   // Atualizar tamanhos disponíveis quando o item muda
   useEffect(() => {
     const selectedProduct = products.find((p) => p.name === item);
@@ -94,22 +108,24 @@ const Pedidos = () => {
     } else if (item === 'Diversos') {
       details.description = additionalNotes; // Usamos additionalNotes como descrição
     } else {
-      // Para outros itens como Brownie, Petit Gateau
+      // Para outros itens, como Brownie, Petit Gateau
       if (additionalNotes) details.additionalNotes = additionalNotes;
     }
+
+    const category = "Pedido Especial"; // Manter categoria fixa conforme solicitado
 
     // Prepare orderDetail
     const orderDetail = {
       item: item,
       qty: quantity,
-      category: 'Pedido Especial', // Categoria fixa
+      category: category, 
       pricePerUnit: price / quantity || 0,
       totalPrice: price || 0,
       details: Object.keys(details).length > 0 ? details : undefined,
     };
 
     // Adicionar item à lista de itens do pedido
-    setOrderItems([...orderItems, orderDetail]);
+    setOrderItems((prevItems) => [...prevItems, orderDetail]);
 
     // Atualizar o preço total do pedido
     setTotalOrderPrice((prevTotal) => prevTotal + price);
@@ -125,7 +141,7 @@ const Pedidos = () => {
     setPrice(0);
   };
 
-  // Função para gerar o CSV do pedido
+  // Função para gerar o CSV do pedido (usada no envio do pedido)
   const generateCSV = () => {
     const fileData = orderItems.map((detail) => {
       const details = detail.details || {};
@@ -220,6 +236,13 @@ const Pedidos = () => {
       if (response.status === 201) {
         alert('Pedido especial enviado com sucesso!');
         generateCSV(); // Gera o CSV após enviar o pedido
+
+        // Limpa o pedido após o envio
+        setOrderItems([]);
+        setTotalOrderPrice(0);
+        localStorage.removeItem('orderItems');
+        localStorage.removeItem('totalOrderPrice');
+
         navigate('/dashboard'); // Redireciona de volta para o dashboard
       } else {
         alert('Erro ao enviar o pedido. Tente novamente.');
@@ -334,7 +357,22 @@ const Pedidos = () => {
         {/* Botões */}
         <div className="buttons">
           <button type="submit">Adicionar Item</button>
-          <button type="button" onClick={() => navigate('/dashboard')}>
+          {/* Botão Voltar (mantém o pedido) */}
+          <button type="button" onClick={() => navigate(-1)}>
+            Voltar
+          </button>
+          {/* Botão Cancelar (termina o pedido) */}
+          <button
+            type="button"
+            onClick={() => {
+              // Cancelar: limpa estado e localStorage e volta ao dashboard
+              setOrderItems([]);
+              setTotalOrderPrice(0);
+              localStorage.removeItem('orderItems');
+              localStorage.removeItem('totalOrderPrice');
+              navigate('/dashboard');
+            }}
+          >
             Cancelar
           </button>
         </div>

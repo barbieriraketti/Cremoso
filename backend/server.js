@@ -1,12 +1,9 @@
-// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
-const fs = require('fs'); // Para manipulação de arquivos
-const path = require('path'); // Para manipulação de caminhos
 require('dotenv').config(); // Importa variáveis de ambiente
 
 const app = express();
@@ -15,7 +12,7 @@ app.use(express.json());
 
 // Conexão com o MongoDB
 mongoose
-  .connect('mongodb://localhost:27017/cremoso')
+  .connect('mongodb://localhost:27017/cremoso', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Conectado ao MongoDB'))
   .catch((err) => console.error('Erro ao conectar ao MongoDB:', err));
 
@@ -256,7 +253,6 @@ app.get('/api/special-products', async (req, res) => {
 });
 
 // Função para gerar o conteúdo do CSV
-// Função para gerar o conteúdo do CSV
 function generateCSV(order) {
   const headers = [
     'Item',
@@ -294,12 +290,15 @@ function generateCSV(order) {
   return csvContent;
 }
 
-
 // Função para gerar o conteúdo do e-mail
 function generateOrderEmail(order) {
   let emailContent = `<h2>Novo Pedido de ${order.user}</h2>`;
-  emailContent += `<p>Data do Pedido: ${new Date(order.createdAt).toLocaleString('pt-BR')}</p>`;
-  emailContent += `<p>Total do Pedido: R$${order.totalPrice.toFixed(2).replace('.', ',')}</p>`;
+  emailContent += `<p>Data do Pedido: ${new Date(order.createdAt).toLocaleString(
+    'pt-BR'
+  )}</p>`;
+  emailContent += `<p>Total do Pedido: R$${order.totalPrice
+    .toFixed(2)
+    .replace('.', ',')}</p>`;
   emailContent += `<h3>Detalhes do Pedido:</h3>`;
   emailContent += `<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">`;
   emailContent += `<tr>`;
@@ -312,7 +311,6 @@ function generateOrderEmail(order) {
   emailContent += `</tr>`;
 
   order.orderDetails.forEach((detail) => {
-    // Preparar sabores
     let sabores = '';
     if (detail.details) {
       if (detail.details.flavor1) sabores += detail.details.flavor1;
@@ -328,7 +326,6 @@ function generateOrderEmail(order) {
     emailContent += `<td>R$${detail.totalPrice.toFixed(2).replace('.', ',')}</td>`;
     emailContent += `</tr>`;
 
-    // Incluir detalhes adicionais abaixo da linha
     if (detail.details) {
       let detalhesExtras = '';
       if (detail.details.size) {
@@ -357,7 +354,6 @@ function generateOrderEmail(order) {
   return emailContent;
 }
 
-// Rota para criar pedidos
 // Rota para criar pedidos
 app.post('/api/order', authMiddleware, async (req, res) => {
   const { user, orderDetails } = req.body;
@@ -414,6 +410,38 @@ app.get('/api/orders', authMiddleware, async (req, res) => {
     res.status(200).json(orders);
   } catch (error) {
     res.status(500).json({ message: 'Erro ao buscar histórico de pedidos.', error });
+  }
+});
+
+// Rota para obter a lista de sabores disponíveis
+app.get('/api/flavors', authMiddleware, async (req, res) => {
+  try {
+    // Busca todos os itens do menu
+    const menuItems = await MenuItem.find({});
+    const flavorsSet = new Set();
+
+    // Extrai os nomes dos itens (sabores) de cada categoria
+    menuItems.forEach((menuItem) => {
+      menuItem.items.forEach((item) => {
+        flavorsSet.add(item.name);
+      });
+    });
+
+    const flavorList = Array.from(flavorsSet);
+    res.json(flavorList);
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar sabores.', error });
+  }
+});
+
+// Rota para obter a lista de categorias disponíveis
+app.get('/api/categories', authMiddleware, async (req, res) => {
+  try {
+    const categories = await MenuItem.distinct('category');
+    res.status(200).json(categories);
+  } catch (error) {
+    console.error('Erro ao buscar categorias:', error);
+    res.status(500).json({ message: 'Erro ao buscar categorias.', error });
   }
 });
 

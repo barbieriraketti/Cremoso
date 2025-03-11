@@ -1,70 +1,145 @@
-# Getting Started with Create React App
+Cremoso - Sistema de Pedidos de Sorveteria
+Descrição do Projeto
+O sistema "Cremoso" é uma solução completa para gerenciamento de pedidos de uma sorveteria, permitindo que os clientes criem pedidos personalizados, que sejam armazenados em um banco de dados MongoDB e enviados por e-mail com um arquivo CSV anexo. O projeto inclui um backend em Node.js com Express e MongoDB, e um frontend que permite interações dinâmicas para adicionar itens ao pedido.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Funcionalidades do Sistema
+Frontend
+Interface de Pedidos:
 
-## Available Scripts
+Criação de pedidos personalizados com opções de sabores, tamanhos e descrições.
+Exibição do preço unitário e total do pedido.
+Adição de múltiplos itens ao pedido.
+Gerenciamento de Itens no Pedido:
 
-In the project directory, you can run:
+Visualização de todos os itens adicionados ao pedido antes da submissão.
+Alteração dinâmica do preço com base no tamanho, quantidade e tipo de item.
+Envio de Pedidos:
 
-### `npm start`
+Botão para enviar o pedido ao backend.
+Redirecionamento para o painel principal após o envio bem-sucedido.
+Backend
+Gerenciamento de Usuários:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Registro de novos usuários com validação de credenciais.
+Login de usuários com autenticação JWT.
+Suporte a diferentes níveis de permissão (usuário comum e administrador).
+Banco de Dados:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+MongoDB para armazenar:
+Usuários.
+Itens do menu (fixos e especiais).
+Pedidos feitos pelos clientes.
+Pedidos Personalizados:
 
-### `npm test`
+Armazenamento de pedidos personalizados com informações detalhadas, incluindo:
+Sabores.
+Categoria.
+Tamanho.
+Preço unitário e total.
+Notas adicionais.
+Cálculo automático do preço total com base nos itens e quantidades selecionadas.
+Envio de Pedidos por E-mail:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Envio automático de e-mails para o administrador com:
+Um resumo detalhado do pedido em formato HTML.
+Um arquivo CSV anexo contendo os detalhes do pedido.
+Geração de Arquivo CSV:
 
-### `npm run build`
+Criação dinâmica de um arquivo CSV com informações do pedido:
+Nome do item.
+Categoria.
+Sabores.
+Quantidade.
+Preço unitário e total.
+Anexo do arquivo CSV ao e-mail enviado ao administrador.
+Rotas do Backend:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+/register: Cadastro de novos usuários.
+/login: Autenticação de usuários com geração de tokens JWT.
+/api/menu: Obtenção dos itens disponíveis no menu.
+/api/special-products: Obtenção de itens especiais com preços dinâmicos.
+/api/order: Criação de pedidos personalizados.
+/api/orders: Recuperação do histórico de pedidos do usuário.
+Fluxo do Sistema
+Cadastro/Login:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+O usuário se cadastra ou faz login para acessar o sistema.
+Criação do Pedido:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+O usuário seleciona itens do menu e os adiciona ao pedido, personalizando sabores, tamanhos e notas adicionais.
+Envio do Pedido:
 
-### `npm run eject`
+Após finalizar o pedido, o usuário envia os detalhes para o backend.
+Armazenamento no Banco de Dados:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+O pedido é salvo no MongoDB com todos os detalhes.
+Envio por E-mail:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+O backend envia um e-mail ao administrador com:
+Resumo do pedido em HTML.
+Arquivo CSV com os detalhes anexado.
+Histórico de Pedidos:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+O usuário pode acessar seu histórico de pedidos a qualquer momento.
+Estrutura de Arquivos
+Frontend
+/src:
+App.js: Configuração principal da aplicação React.
+Pedidos.js: Tela de criação de pedidos especiais.
+Dashboard.js: Tela inicial com navegação para funcionalidades do sistema.
+Pedidos.css: Estilo da tela de pedidos.
+Backend
+server.js: Configuração do servidor e rotas principais.
+.env: Variáveis de ambiente para credenciais sensíveis.
+package.json: Dependências do projeto.
+/models:
+User.js: Modelo de usuário.
+MenuItem.js: Modelo para itens do menu.
+Order.js: Modelo de pedidos.
+SpecialProduct.js: Modelo para produtos especiais.
+Tecnologias Utilizadas
+Frontend
+React.js:
+Gerenciamento de estados com hooks.
+Rotas e navegação.
+Backend
+Node.js:
+Framework Express para gerenciamento de rotas.
+Nodemailer para envio de e-mails.
+JWT para autenticação de usuários.
+MongoDB:
+Armazenamento e gerenciamento de dados do sistema.
+Modelos definidos com Mongoose.
+Dependências do Backend
+Express: Servidor HTTP.
+Mongoose: ODM para integração com MongoDB.
+Nodemailer: Envio de e-mails.
+jsonwebtoken: Autenticação baseada em tokens.
+dotenv: Gerenciamento de variáveis de ambiente.
+Para instalar as dependências:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+npm install
+Como Configurar e Executar o Sistema
+Pré-requisitos
+Node.js instalado na máquina.
+MongoDB em execução localmente ou em um servidor remoto.
+Configuração
+Clone o repositório do projeto.
+Configure as variáveis de ambiente no arquivo .env:
+EMAIL_USER=seu_email@gmail.com
+EMAIL_PASS=sua_senha_de_aplicativo
+EMAIL_TO=email_destinatario@gmail.com
+JWT_SECRET=seu_segredo_jwt
+Instale as dependências no backend:
+npm install
+Inicie o servidor:
+node server.js
+No frontend, configure a URL do backend, instale as dependências e inicie a aplicação.
+Principais Funcionalidades a Serem Adicionadas
+Dashboard Administrativo:
+Permitir gerenciamento de itens do menu pelo administrador.
+Notificações de Pedido:
+Exibição de notificações para pedidos recebidos.
+Relatórios:
+Geração de relatórios detalhados de vendas.
+Se tiver dúvidas ou problemas, não hesite em entrar em contato! 🚀

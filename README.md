@@ -1,3 +1,5 @@
+--Branch Main mais atualizada!!
+
 Cremoso - Sistema de Pedidos de Sorveteria
 Descrição do Projeto
 O sistema "Cremoso" é uma solução completa para gerenciamento de pedidos de uma sorveteria, permitindo que os clientes criem pedidos personalizados, que sejam armazenados em um banco de dados MongoDB e enviados por e-mail com um arquivo CSV anexo. O projeto inclui um backend em Node.js com Express e MongoDB, e um frontend que permite interações dinâmicas para adicionar itens ao pedido.
